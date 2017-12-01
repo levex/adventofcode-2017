@@ -1,6 +1,9 @@
 module Lib
     ( calcCaptcha
     , doCaptcha
+    , doHalfwayCaptcha
+    , first
+    , second
     ) where
 
 
@@ -21,8 +24,22 @@ doCaptcha :: String -> Int
 doCaptcha str
   = snd $ foldl (\(lst, sum) e -> if e == lst then (e, sum + conv e) else (e, sum)) (last str, 0) str
 
+doHalfwayCaptcha :: String -> Int
+doHalfwayCaptcha str
+  = snd $
+    foldl (\(pos, sum) e ->
+      if e == str !! ((pos + offset) `mod` length str)
+        then (pos + 1, sum + conv e)
+        else (pos + 1, sum))
+    (0, 0) str
+  where
+    offset = (length str) `div` 2
+
+first = doCaptcha
+second = doHalfwayCaptcha
+
 -- given a filename, returns the captcha value
-calcCaptcha :: String -> IO Int
-calcCaptcha fn = do
+calcCaptcha :: (String -> Int) -> String -> IO Int
+calcCaptcha version fn = do
   str <- filter (\c -> c >= '0' && c <= '9') <$> readFile fn
-  return $ doCaptcha str
+  return $ version str
