@@ -26,4 +26,3 @@ partOne' x y d n num
    x'' = x' + d'
    n'''' = n''' + d'
    d'' = d' + 1 -- 4
-
